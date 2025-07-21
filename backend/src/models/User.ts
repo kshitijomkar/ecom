@@ -1,11 +1,11 @@
-import mongoose, { Document, Model } from 'mongoose';
+import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-export interface IUser extends Document {
+export interface IUser extends mongoose.Document {
   name: string;
   email: string;
   password: string;
-  role: 'user' | 'admin';
+  role: string;
   matchPassword: (enteredPassword: string) => Promise<boolean>;
 }
 
@@ -51,5 +51,5 @@ userSchema.methods.matchPassword = async function (enteredPassword: string) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-const User: Model<IUser> = mongoose.model<IUser>('User', userSchema);
+const User = mongoose.model<IUser>('User', userSchema);
 export default User;

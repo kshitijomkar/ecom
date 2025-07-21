@@ -1,13 +1,19 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import asyncHandler from 'express-async-handler';
-import User, { IUser } from '../models/User';
+import User from '../models/User';
 
-// Add authUser to Request interface
-declare module 'express' {
-  interface Request {
-    authUser?: IUser;
+declare global {
+  namespace Express {
+    interface Request {
+      user?: typeof User;
+    }
   }
+}
+
+interface DecodedToken extends JwtPayload {
+  id: string;
+  role: string;
 }
 
 const protect = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
@@ -25,12 +31,11 @@ const protect = asyncHandler(async (req: Request, res: Response, next: NextFunct
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as DecodedToken;
     
-    // Use authUser instead of user
-    req.authUser = await User.findById(decoded.id).select('-password') as IUser;
+    req.user = await User.findById(decoded.id).select('-password');
     
-    if (!req.authUser) {
+    if (!req.user) {
       res.status(401);
       throw new Error('Not authorized, user not found');
     }
@@ -44,7 +49,7 @@ const protect = asyncHandler(async (req: Request, res: Response, next: NextFunct
 });
 
 const admin = (req: Request, res: Response, next: NextFunction) => {
-  if (req.authUser?.role !== 'admin') {
+  if (req.user?.role !== 'admin') {
     res.status(403);
     throw new Error('Not authorized as admin');
   }

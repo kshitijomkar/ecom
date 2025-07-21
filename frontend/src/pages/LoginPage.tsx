@@ -23,8 +23,10 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto my-12 p-6 bg-white rounded-xl shadow-lg">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Login to MediCart</h2>
-      
+      <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+        Login to MediCart
+      </h2>
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label htmlFor="email" className="block text-gray-700 mb-2">
@@ -40,7 +42,7 @@ const LoginPage: React.FC = () => {
             placeholder="you@example.com"
           />
         </div>
-        
+
         <div>
           <label htmlFor="password" className="block text-gray-700 mb-2">
             Password
@@ -56,7 +58,7 @@ const LoginPage: React.FC = () => {
             placeholder="••••••"
           />
         </div>
-        
+
         <button
           type="submit"
           disabled={loading}
@@ -64,7 +66,7 @@ const LoginPage: React.FC = () => {
         >
           {loading ? 'Logging in...' : 'Login'}
         </button>
-        
+
         <div className="text-center mt-4">
           <Link to="/register" className="text-blue-600 hover:underline">
             Don't have an account? Register

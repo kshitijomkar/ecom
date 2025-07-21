@@ -3,12 +3,15 @@ import asyncHandler from 'express-async-handler';
 import User, { IUser } from '../models/User';
 import generateToken from '../utils/generateToken';
 
-// Simplified AuthRequest interface
 interface AuthRequest extends Request {
+  body: {
+    name?: string;
+    email: string;
+    password: string;
+  };
   user?: IUser;
 }
 
-// Interface for response data
 interface AuthResponse {
   _id: string;
   name: string;
@@ -20,7 +23,7 @@ interface AuthResponse {
 // @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public
-const registerUser = asyncHandler(async (req: AuthRequest, res: Response) => {
+const registerUser = asyncHandler(async (req: AuthRequest, res: Response<AuthResponse>) => {
   const { name, email, password } = req.body;
 
   const userExists = await User.findOne({ email });
@@ -43,7 +46,7 @@ const registerUser = asyncHandler(async (req: AuthRequest, res: Response) => {
       email: user.email,
       role: user.role,
       token: generateToken(user._id.toString(), user.role)
-    } as AuthResponse);
+    });
   } else {
     res.status(400);
     throw new Error('Invalid user data');
@@ -53,7 +56,7 @@ const registerUser = asyncHandler(async (req: AuthRequest, res: Response) => {
 // @desc    Login user
 // @route   POST /api/auth/login
 // @access  Public
-const loginUser = asyncHandler(async (req: AuthRequest, res: Response) => {
+const loginUser = asyncHandler(async (req: AuthRequest, res: Response<AuthResponse>) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
@@ -65,7 +68,7 @@ const loginUser = asyncHandler(async (req: AuthRequest, res: Response) => {
       email: user.email,
       role: user.role,
       token: generateToken(user._id.toString(), user.role)
-    } as AuthResponse);
+    });
   } else {
     res.status(401);
     throw new Error('Invalid email or password');
@@ -85,7 +88,7 @@ const getUserProfile = asyncHandler(async (req: AuthRequest, res: Response) => {
   
   if (user) {
     res.json({
-      _id: user._id.toString(),
+      _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role

@@ -24,8 +24,10 @@ const RegisterPage: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto my-12 p-6 bg-white rounded-xl shadow-lg">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Create Account</h2>
-      
+      <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+        Create Account
+      </h2>
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label htmlFor="name" className="block text-gray-700 mb-2">
@@ -41,7 +43,7 @@ const RegisterPage: React.FC = () => {
             placeholder="John Doe"
           />
         </div>
-        
+
         <div>
           <label htmlFor="email" className="block text-gray-700 mb-2">
             Email Address
@@ -56,7 +58,7 @@ const RegisterPage: React.FC = () => {
             placeholder="you@example.com"
           />
         </div>
-        
+
         <div>
           <label htmlFor="password" className="block text-gray-700 mb-2">
             Password
@@ -71,9 +73,11 @@ const RegisterPage: React.FC = () => {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="••••••"
           />
-          <p className="mt-1 text-sm text-gray-500">Must be at least 6 characters</p>
+          <p className="mt-1 text-sm text-gray-500">
+            Must be at least 6 characters
+          </p>
         </div>
-        
+
         <button
           type="submit"
           disabled={loading}
@@ -81,7 +85,7 @@ const RegisterPage: React.FC = () => {
         >
           {loading ? 'Creating account...' : 'Register'}
         </button>
-        
+
         <div className="text-center mt-4">
           <p className="text-gray-600">
             Already have an account?{' '}
