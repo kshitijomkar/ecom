@@ -14,6 +14,7 @@ const NotFoundPage = React.lazy(() => import('./pages/NotFoundPage'));
 function App() {
   return (
     <Routes>
+      {/* Remove element prop from parent Route */}
       <Route path="/" element={<Layout />}>
         <Route index element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />

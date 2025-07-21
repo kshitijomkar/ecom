@@ -1,40 +1,34 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Outlet } from 'react-router-dom'; // Add this import
 import { useAuth } from '../context/AuthContext';
 
-const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const Layout: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-
+  
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <header className="bg-blue-600 text-white p-4 shadow-md">
         <div className="container mx-auto flex justify-between items-center">
-          <Link to="/" className="text-2xl font-bold">MediCart</Link>
+          <a href="/" className="text-2xl font-bold">MediCart</a>
           
           <nav>
             <ul className="flex space-x-6">
               <li>
-                <Link to="/" className="hover:underline">Home</Link>
+                <a href="/" className="hover:underline">Home</a>
               </li>
               
               {isAuthenticated ? (
                 <>
                   <li>
-                    <Link to="/profile" className="hover:underline">Profile</Link>
+                    <a href="/profile" className="hover:underline">Profile</a>
                   </li>
                   {user?.role === 'admin' && (
                     <li>
-                      <Link to="/admin" className="hover:underline">Admin</Link>
+                      <a href="/admin" className="hover:underline">Admin</a>
                     </li>
                   )}
                   <li>
-                    <button onClick={handleLogout} className="hover:underline">
+                    <button onClick={logout} className="hover:underline">
                       Logout
                     </button>
                   </li>
@@ -42,10 +36,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               ) : (
                 <>
                   <li>
-                    <Link to="/login" className="hover:underline">Login</Link>
+                    <a href="/login" className="hover:underline">Login</a>
                   </li>
                   <li>
-                    <Link to="/register" className="hover:underline">Register</Link>
+                    <a href="/register" className="hover:underline">Register</a>
                   </li>
                 </>
               )}
@@ -55,7 +49,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </header>
       
       <main className="flex-grow container mx-auto p-4">
-        {children}
+        {/* Use Outlet instead of children */}
+        <Outlet />
       </main>
       
       <footer className="bg-gray-800 text-white p-4 text-center">
