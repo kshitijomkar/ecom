@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
 import User, { IUser } from '../models/User';
 import generateToken from '../utils/generateToken';
+import { Document, Types } from 'mongoose';
 
 interface AuthRequest extends Request {
   body: {
@@ -9,7 +10,7 @@ interface AuthRequest extends Request {
     email: string;
     password: string;
   };
-  user?: IUser;
+  user?: IUser | Document<IUser>;  // Correctly use Document<IUser>
 }
 
 interface AuthResponse {
@@ -41,7 +42,7 @@ const registerUser = asyncHandler(async (req: AuthRequest, res: Response<AuthRes
 
   if (user) {
     res.status(201).json({
-      _id: user._id.toString(),
+      _id: user._id.toString(),  // Ensure _id is converted to string
       name: user.name,
       email: user.email,
       role: user.role,
@@ -63,7 +64,7 @@ const loginUser = asyncHandler(async (req: AuthRequest, res: Response<AuthRespon
 
   if (user && (await user.matchPassword(password))) {
     res.json({
-      _id: user._id.toString(),
+      _id: user._id.toString(),  // Ensure _id is converted to string
       name: user.name,
       email: user.email,
       role: user.role,
@@ -83,15 +84,19 @@ const getUserProfile = asyncHandler(async (req: AuthRequest, res: Response) => {
     res.status(404);
     throw new Error('User not found');
   }
-  
-  const user = await User.findById(req.user._id).select('-password');
-  
-  if (user) {
+
+  // Cast `user` to Document<IUser>
+  const user = req.user as Document<IUser>;
+
+  // Forcefully cast _id to string (or ObjectId)
+  const foundUser = await User.findById(user._id as Types.ObjectId).select('-password');  // Use ObjectId here
+
+  if (foundUser) {
     res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role
+      _id: foundUser._id.toString(),  // Ensure _id is treated as string
+      name: foundUser.name,
+      email: foundUser.email,
+      role: foundUser.role
     });
   } else {
     res.status(404);
