@@ -1,8 +1,12 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import connectDB from './config/db'; // ADD THIS
 
 dotenv.config();
+
+// Connect to database
+connectDB(); // ADD THIS
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -13,9 +17,12 @@ app.use(express.json());
 
 // Test route
 app.get('/api', (req, res) => {
-  res.json({ message: 'eCommerce API is running!' });
+  res.json({ 
+    message: 'eCommerce API is running!',
+    database: 'Connected to MongoDB Atlas' // UPDATED
+  });
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
 });
