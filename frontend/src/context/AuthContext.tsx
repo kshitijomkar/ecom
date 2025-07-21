@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -8,6 +8,7 @@ interface User {
   name: string;
   email: string;
   role: string;
+  token?: string;
 }
 
 interface AuthContextType {
@@ -26,77 +27,82 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Check if user is logged in on initial load
+  // Initialize axios defaults
   useEffect(() => {
-    const checkLoggedIn = async () => {
+    axios.defaults.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+    axios.interceptors.response.use(
+      response => response,
+      error => {
+        if (error.response?.status === 401) {
+          localStorage.removeItem('token');
+          setUser(null);
+          navigate('/login');
+        }
+        return Promise.reject(error);
+      }
+    );
+  }, [navigate]);
+
+  // Check auth status on mount
+  useEffect(() => {
+    const checkAuthStatus = async () => {
       try {
         const token = localStorage.getItem('token');
         if (token) {
-          const { data } = await axios.get('/api/auth/profile', {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          const { data } = await axios.get('/auth/profile');
           setUser(data);
         }
       } catch (error) {
-        console.error('Error checking login status', error);
         localStorage.removeItem('token');
       } finally {
         setLoading(false);
       }
     };
 
-    checkLoggedIn();
-  }, []);
+    checkAuthStatus();
+  }, [navigate]);
 
-  // Login function
   const login = async (email: string, password: string) => {
     try {
-      const { data } = await axios.post('/api/auth/login', { email, password });
+      const { data } = await axios.post('/auth/login', { email, password });
       localStorage.setItem('token', data.token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
       setUser(data);
       toast.success(`Welcome back, ${data.name}!`);
       navigate('/');
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Login failed');
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
+      toast.error(err.response?.data?.message || 'Login failed');
       throw error;
     }
   };
 
-  // Register function
   const register = async (name: string, email: string, password: string) => {
     try {
-      const { data } = await axios.post('/api/auth/register', { name, email, password });
+      const { data } = await axios.post('/auth/register', { name, email, password });
       localStorage.setItem('token', data.token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
       setUser(data);
       toast.success(`Account created for ${data.name}!`);
       navigate('/');
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Registration failed');
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
+      toast.error(err.response?.data?.message || 'Registration failed');
       throw error;
     }
   };
 
-  // Logout function
   const logout = () => {
     localStorage.removeItem('token');
+    delete axios.defaults.headers.common['Authorization'];
     setUser(null);
     toast.info('You have been logged out');
     navigate('/login');
   };
 
   return (
-    <AuthContext.Provider 
-      value={{ 
-        user, 
-        loading, 
-        isAuthenticated: !!user,
-        login, 
-        register, 
-        logout 
-      }}
-    >
+    <AuthContext.Provider value={{ user, loading, isAuthenticated: !!user, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -104,7 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
