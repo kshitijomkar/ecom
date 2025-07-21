@@ -6,6 +6,7 @@ import authRoutes from './routes/authRoutes';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ const limiter = rateLimit({
 });
 
 const app = express();
+
 
 // Connect to MongoDB with retry logic
 const MAX_RETRIES = 3;
@@ -39,11 +41,15 @@ const connectWithRetry = async () => {
 connectWithRetry();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}));
 app.use(express.json());
 app.use(helmet());
 app.use(mongoSanitize());
 app.use(limiter);
+app.use(cookieParser());
 
 // Routes
 app.use('/api/auth', authRoutes);
