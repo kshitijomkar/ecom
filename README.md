@@ -1,13 +1,20 @@
-
 # MediCart - Medical eCommerce Platform
 
-MERN stack eCommerce application for medical devices
+MERN stack application for medical devices eCommerce
 
-## Setup
-1. Clone repo
-2. Run `npm install` in both `frontend` and `backend`
-3. Create `.env` in backend (see .env.example)
+## 🚀 Features
+- User authentication with JWT
+- Product catalog management
+- Shopping cart functionality
+- Order processing system
+- Admin dashboard
 
-## Running
-- Frontend: `cd frontend && npm start`
-- Backend: `cd backend && npm run dev`
+## 🛠️ Setup Instructions
+
+### Backend Setup
+```bash
+cd backend
+npm install
+cp .env.example .env
+# Edit .env with your MongoDB Atlas credentials
+npm run dev
