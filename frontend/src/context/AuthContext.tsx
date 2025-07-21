@@ -8,7 +8,6 @@ interface User {
   name: string;
   email: string;
   role: string;
-  token?: string;
 }
 
 interface AuthResponse {
@@ -33,15 +32,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Set up axios base URL
+    axios.defaults.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+    
     const checkAuthStatus = async () => {
       try {
         const token = localStorage.getItem('token');
         if (token) {
-          const { data } = await axios.get<AuthResponse>('/auth/profile', {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          const { data } = await axios.get<AuthResponse>('/auth/profile');
           setUser(data.user);
         }
       } catch (error) {
@@ -58,6 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data } = await axios.post<AuthResponse>('/auth/login', { email, password });
       localStorage.setItem('token', data.token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
       setUser(data.user);
       toast.success(`Welcome back, ${data.user.name}!`);
       navigate('/');
@@ -71,6 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data } = await axios.post<AuthResponse>('/auth/register', { name, email, password });
       localStorage.setItem('token', data.token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
       setUser(data.user);
       toast.success(`Account created for ${data.user.name}!`);
       navigate('/');
@@ -82,6 +83,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     localStorage.removeItem('token');
+    delete axios.defaults.headers.common['Authorization'];
     setUser(null);
     toast.info('You have been logged out');
     navigate('/login');

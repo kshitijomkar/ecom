@@ -5,7 +5,7 @@ import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
-import mongoose from 'mongoose'; // Add this import
+import mongoose from 'mongoose'; // Import mongoose
 import connectDB from './config/db';
 import authRoutes from './routes/authRoutes';
 
